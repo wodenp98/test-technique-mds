@@ -1,13 +1,15 @@
 "use client";
 import Image from "next/image";
 import axios from "axios";
+import { Ring } from "@uiball/loaders";
 import { useState, useEffect } from "react";
 import Select from "../../../components/select/Select";
-import { Search } from "lucide-react";
+import { Search, Eye, Heart } from "lucide-react";
 import {
   optionsCategory,
   optionsColors,
   optionsVideoType,
+  optionsOrder,
 } from "../../../data/optionsDataApi";
 
 export default function VideoPage() {
@@ -38,7 +40,16 @@ export default function VideoPage() {
       `https://pixabay.com/api/videos/?key=${process.env.NEXT_PUBLIC_PIXABAY_API_KEY}&q=${query}&video_type=${videoType}&lg=fr&page=${page}&per_page=20&colors=${colors}&category=${category}&order=${order}&safesearch=true`
     );
     const hits = response.data.hits;
-    const videoUrls = hits.map((hit) => hit.videos.medium.url);
+    const videoUrls = hits.map((hit) => {
+      return {
+        id: hit.id,
+        videoUrl: hit.videos.medium.url,
+        views: hit.views,
+        likes: hit.likes,
+        userImageURL: hit.userImageURL,
+        tags: hit.tags,
+      };
+    });
     const totalHits = response.data.totalHits;
     setVideo(videoUrls);
     setTotalHits(totalHits);
@@ -107,7 +118,6 @@ export default function VideoPage() {
           </button>
         </div>
       </form>
-      <p>{totalHits} results found</p>
       <div className="flex justify-between">
         <div className="flex">
           <Select
@@ -135,19 +145,42 @@ export default function VideoPage() {
 
         <p className="mb-2">{totalHits} results found</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-        {video.map((video) => (
-          <div className="border rounded-lg overflow-hidden" key={video}>
+        {video.map((item) => (
+          <div
+            className="relative group border rounded-lg overflow-hidden"
+            key={item.id}
+          >
             <video
-              src={video}
-              alt={video}
+              src={item.videoUrl}
+              alt={item.id}
               width={500}
               height={500}
               controls
               type="video/mp4"
               className="w-full h-72  object-cover"
             />
+            <div className="absolute inset-0 flex justify-between h-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="text-white text-right p-2">
+                <Image
+                  src={item.userImageURL}
+                  alt={item.id}
+                  width={50}
+                  height={50}
+                  className="rounded-full"
+                />
+              </div>
+              <div className="flex">
+                <div className="text-white flex p-2">
+                  <Eye size={24} className="mr-2" />
+                  {item.views}
+                </div>
+                <div className="text-white flex p-2">
+                  <Heart size={24} className="mr-2" />
+                  {item.likes}
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import Select from "../../../components/select/Select";
-import { Search } from "lucide-react";
+import { Search, Eye, Heart } from "lucide-react";
 import {
   optionsOrder,
   optionsCategory,
@@ -30,7 +30,16 @@ export default function ImagePage() {
       `https://pixabay.com/api/?key=${process.env.NEXT_PUBLIC_PIXABAY_API_KEY}&q=${query}&lg=fr&page=${page}&per_page=20&colors=${colors}&category=${category}&order=${order}&safesearch=true`
     );
     const hits = response.data.hits;
-    const imageUrls = hits.map((hit) => hit.webformatURL);
+    const imageUrls = hits.map((hit) => {
+      return {
+        id: hit.id,
+        imageUrl: hit.webformatURL,
+        views: hit.views,
+        likes: hit.likes,
+        userImageURL: hit.userImageURL,
+        tags: hit.tags,
+      };
+    });
     const totalHits = response.data.totalHits;
     setImages(imageUrls);
     setTotalHits(totalHits);
@@ -93,7 +102,6 @@ export default function ImagePage() {
           </button>
         </div>
       </form>
-
       <div className="flex justify-between">
         <div className="flex">
           <Select
@@ -116,15 +124,36 @@ export default function ImagePage() {
         <p className="mb-2">{totalHits} results found</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-        {images.map((imageUrl, index) => (
-          <div className="border rounded-lg overflow-hidden" key={imageUrl}>
+        {images.map((item) => (
+          <div className="relative group" key={item.id}>
             <Image
-              src={imageUrl}
-              alt={imageUrl}
+              src={item.imageUrl}
+              alt={item.id}
               width={500}
               height={500}
-              className="w-full h-72  object-cover"
+              className="w-full h-72 object-cover"
             />
+            <div>
+              <div className="absolute inset-0 flex flex-col justify-between opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="text-white text-right p-2">
+                  <Image
+                    src={item.userImageURL}
+                    alt={item.id}
+                    width={50}
+                    height={50}
+                    className="rounded-full"
+                  />
+                </div>
+                <div className="flex justify-between">
+                  <div className="text-white flex justify-center p-2">
+                    <Eye size={24} className="mr-2" /> {item.views}
+                  </div>
+                  <div className="text-white flex justify-center p-2">
+                    <Heart size={24} className="mr-2" /> {item.likes}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

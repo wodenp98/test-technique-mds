@@ -47,7 +47,7 @@ export const optionsColors = [
 ];
 
 export const optionsVideoType = [
-  { label: "All", value: "all" },
+  { label: "Video Type", value: "all" },
   { label: "Film", value: "film" },
   { label: "Animation", value: "animation" },
 ];
